@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Схема параллельного гибрида</title>
+    <style>
+        :root {
+            --bg: #0c0c14;
+            --panel-bg: #12121c;
+            --card-bg: #161622;
+            --border: #252533;
+            --text: #c8c8d4;
+            --muted: #7a7a8c;
+            --accent: #00ff41;
+            --accent-dim: rgba(0, 255, 65, 0.15);
+            --danger: #ff4444;
+            --warning: #f0a030;
+            --inactive: #2a2a38;
+            --comp-fill: #1c1c2c;
+            --comp-stroke: #2e2e40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px 16px 8px;
+            letter-spacing: 0.05em;
+        }
+        .header h1 {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header .subtitle {
+            font-size: 0.65rem;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+            margin-top: 2px;
+            opacity: 0.6;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1000px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 14px;
+        }
+
+        /* ---- Scheme ---- */
+        .scheme-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 370px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+        .scheme-wrapper svg {
+            width: 100%;
+            height: 100%;
+            max-height: 440px;
+        }
+
+        /* ---- SVG ---- */
+        .comp {
+            transition: fill 0.35s, stroke 0.35s;
+        }
+        .comp-on {
+            stroke: var(--accent) !important;
+        }
+        .line {
+            transition: stroke 0.35s;
+        }
+        .line-on {
+            stroke: var(--accent) !important;
+        }
+        .dash {
+            transition: opacity 0.3s;
+            opacity: 0;
+            stroke: var(--accent);
+            stroke-dasharray: 8 16;
+        }
+        .dash-on {
+            opacity: 1;
+            animation: dashFlow 0.55s linear infinite;
+        }
+        @keyframes dashFlow {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+        .txt-label {
+            font-size: 10px;
+            fill: var(--muted);
+            letter-spacing: 0.04em;
+            transition: fill 0.35s;
+        }
+        .txt-label-on {
+            fill: var(--accent);
+        }
+        .txt-status {
+            font-size: 8px;
+            letter-spacing: 0.05em;
+            transition: fill 0.35s;
+        }
+
+        /* ---- Control Panel ---- */
+        .control-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px 18px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 750px) {
+            .control-panel {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+        .panel-section.row-span {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .panel-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            text-align: center;
+        }
+        .panel-value {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--accent);
+            transition: color 0.3s;
+        }
+        .panel-value.muted {
+            color: var(--muted);
+        }
+        .panel-unit {
+            font-size: 0.6rem;
+            color: var(--muted);
+            margin-left: 2px;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: inherit;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 9px 16px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--card-bg);
+            color: var(--text);
+            outline: none;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            border-color: var(--accent-dim);
+            background: #1e1e2e;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn.ignition {
+            min-width: 90px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+        .btn.ignition.on {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            box-shadow: 0 0 14px var(--accent-dim);
+            animation: ignPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes ignPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 14px var(--accent-dim);
+            }
+            50% {
+                box-shadow: 0 0 26px var(--accent-dim);
+            }
+        }
+        .btn.mode-btn {
+            min-width: 66px;
+            font-size: 0.66rem;
+            padding: 7px 10px;
+        }
+        .btn.mode-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Range */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: var(--inactive);
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid #000;
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--accent-dim);
+        }
+        input[type="range"]:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        input[type="range"]:disabled::-webkit-slider-thumb {
+            background: #555;
+            box-shadow: none;
+        }
+
+        /* Number input */
+        input[type="number"] {
+            font-family: inherit;
+            width: 64px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--accent);
+            padding: 6px 6px;
+            font-size: 0.82rem;
+            text-align: center;
+            letter-spacing: 0.03em;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent);
+        }
+
+        .throttle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 180px;
+        }
+        .throttle-wrap input[type="range"] {
+            flex: 1;
+        }
+        .throttle-pct {
+            font-size: 0.85rem;
+            color: var(--accent);
+            min-width: 32px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Параллельный гибрид &mdash; силовая схема</h1>
+        <!-- <div class="subtitle">Привод задний &middot; ДВС &rarr; Батарея &rarr; Э/мотор &rarr; Колёса</div> -->
+    </div>
+
+    <div class="main-container">
+
+        <!-- ============ SVG SCHEME ============ -->
+        <div class="scheme-wrapper">
+            <svg viewBox="0 0 920 440" xmlns="http://www.w3.org/2000/svg">
+
+                <defs>
+                    <marker id="arrG" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                        <polygon points="0 0, 7 2.5, 0 5" fill="#00ff41" />
+                    </marker>
+                    <marker id="arrD" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                        <polygon points="0 0, 7 2.5, 0 5" fill="#2e2e40" />
+                    </marker>
+                </defs>
+
+                <!-- ===== Линия: ДВС → Батарея ===== -->
+                <g id="gIceBatt">
+                    <polyline points="190,215 190,75 290,75 290,120"
+                    fill="none" stroke="#2e2e40" stroke-width="3" class="line" id="lIceBatt" />
+                    <polyline points="190,215 190,75 290,75 290,120"
+                    fill="none" stroke="#00ff41" stroke-width="3" class="dash" id="dIceBatt" />
+                    <polygon points="285,113 295,120 285,127" fill="#2e2e40" class="line" id="aIceBatt" />
+                </g>
+
+                <!-- ===== Линия: Батарея → Э/мотор ===== -->
+                <g id="gBattMotor">
+                    <line x1="380" y1="135" x2="380" y2="175"
+                    fill="none" stroke="#2e2e40" stroke-width="3" class="line" id="lBattMotor" />
+                    <line x1="380" y1="135" x2="380" y2="175"
+                    fill="none" stroke="#00ff41" stroke-width="3" class="dash" id="dBattMotor" />
+                    <polygon points="374,168 380,178 386,168" fill="#2e2e40" class="line" id="aBattMotor" />
+                </g>
+
+                <!-- ===== Линия: Э/мотор → Дифф → Колёса ===== -->
+                <g id="gMotorWheels">
+                    <line x1="500" y1="240" x2="555" y2="240"
+                    fill="none" stroke="#2e2e40" stroke-width="3" class="line" id="lMotorDiff" />
+                    <line x1="500" y1="240" x2="555" y2="240"
+                    fill="none" stroke="#00ff41" stroke-width="3" class="dash" id="dMotorDiff" />
+                    <line x1="580" y1="232" x2="690" y2="155"
+                    fill="none" stroke="#2e2e40" stroke-width="3" class="line" id="lAxleU" />
+                    <line x1="580" y1="248" x2="690" y2="325"
+                    fill="none" stroke="#2e2e40" stroke-width="3" class="line" id="lAxleL" />
+                    <polygon points="636,194 646,187 641,200" fill="#2e2e40" class="line" id="aAxleU" />
+                    <polygon points="636,286 646,293 641,280" fill="#2e2e40" class="line" id="aAxleL" />
+                </g>
+
+                <!-- ===== ДВС — простой блок ===== -->
+                <g id="gIce" transform="translate(55, 160)">
+                    <rect x="0" y="0" width="135" height="110" rx="6"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="2.5" class="comp" id="iceBody" />
+                    <text x="67" y="42" text-anchor="middle" class="txt-label" font-size="22" fill="#2e2e40" id="iceIcon">⚙</text>
+                    <text x="67" y="68" text-anchor="middle" class="txt-label" id="lblIce">ДВС</text>
+                    <text x="67" y="84" text-anchor="middle" class="txt-status" fill="#555" id="stIce">ВЫКЛ</text>
+                    <text x="67" y="100" text-anchor="middle" class="txt-status" fill="#444" font-size="7" id="stIceDetail">Двигатель внутр. сгорания</text>
+                </g>
+
+                <!-- ===== Батарея — простой блок с сегментами ===== -->
+                <g id="gBatt" transform="translate(280, 58)">
+                    <rect x="0" y="0" width="200" height="77" rx="6"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="2.5" class="comp" id="battBody" />
+                    <!-- Сегменты — 5 полосок -->
+                    <rect x="16" y="16" width="30" height="45" rx="3" fill="#222236" stroke="#2e2e40" stroke-width="1" id="bS0" />
+                    <rect x="50" y="16" width="30" height="45" rx="3" fill="#222236" stroke="#2e2e40" stroke-width="1" id="bS1" />
+                    <rect x="84" y="16" width="30" height="45" rx="3" fill="#222236" stroke="#2e2e40" stroke-width="1" id="bS2" />
+                    <rect x="118" y="16" width="30" height="45" rx="3" fill="#222236" stroke="#2e2e40" stroke-width="1" id="bS3" />
+                    <rect x="152" y="16" width="30" height="45" rx="3" fill="#222236" stroke="#2e2e40" stroke-width="1" id="bS4" />
+                    <text x="100" y="80" text-anchor="middle" class="txt-label" id="lblBatt">БАТАРЕЯ</text>
+                    <text x="100" y="92" text-anchor="middle" class="txt-status" fill="#555" id="stBatt">--%</text>
+                </g>
+
+                <!-- ===== Электродвигатель — простой блок ===== -->
+                <g id="gMotor" transform="translate(380, 175)">
+                    <rect x="0" y="0" width="120" height="80" rx="6"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="2.5" class="comp" id="motorBody" />
+                    <text x="60" y="34" text-anchor="middle" class="txt-label" font-size="20" fill="#2e2e40" id="motorIcon">⚡</text>
+                    <text x="60" y="56" text-anchor="middle" class="txt-label" id="lblMotor">ЭЛЕКТРО-</text>
+                    <text x="60" y="68" text-anchor="middle" class="txt-label" id="lblMotor2">ДВИГАТЕЛЬ</text>
+                    <text x="60" y="86" text-anchor="middle" class="txt-status" fill="#555" id="stMotor">ВЫКЛ</text>
+                </g>
+
+                <!-- ===== Дифференциал — простой блок ===== -->
+                <g id="gDiff" transform="translate(555, 212)">
+                    <rect x="0" y="0" width="50" height="56" rx="5"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="2.5" class="comp" id="diffBody" />
+                    <text x="25" y="38" text-anchor="middle" class="txt-status" fill="#444" font-size="9">ДИФФ</text>
+                </g>
+
+                <!-- ===== Задние колёса — простые блоки ===== -->
+                <g id="gWheelU" transform="translate(695, 135)">
+                    <rect x="0" y="0" width="55" height="55" rx="5"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="3" class="comp" id="wUo" />
+                    <text x="27" y="36" text-anchor="middle" class="txt-status" fill="#444" font-size="9">ЗАДН</text>
+                    <text x="27" y="48" text-anchor="middle" class="txt-status" fill="#444" font-size="8">П</text>
+                </g>
+                <g id="gWheelL" transform="translate(695, 305)">
+                    <rect x="0" y="0" width="55" height="55" rx="5"
+                    fill="#1c1c2c" stroke="#2e2e40" stroke-width="3" class="comp" id="wLo" />
+                    <text x="27" y="36" text-anchor="middle" class="txt-status" fill="#444" font-size="9">ЗАДН</text>
+                    <text x="27" y="48" text-anchor="middle" class="txt-status" fill="#444" font-size="8">Л</text>
+                </g>
+
+                <!-- ===== Рама (декор) ===== -->
+                <rect x="42" y="82" width="740" height="290" rx="26" fill="none" stroke="#1c1c2c" stroke-width="1.5" stroke-dasharray="5 14" opacity="0.4" />
+                <text x="440" y="410" text-anchor="middle" fill="#181828" font-size="8" letter-spacing="0.1em">РАМА — ВИД СВЕРХУ</text>
+            </svg>
+        </div>
+
+        <!-- ============ CONTROL PANEL ============ -->
+        <div class="control-panel">
+            <!-- Зажигание -->
+            <div class="panel-section">
+                <span class="panel-label">Зажигание</span>
+                <button class="btn ignition" id="btnIgn" onclick="toggleIgnition()">START</button>
+            </div>
+
+            <!-- Режим -->
+            <div class="panel-section">
+                <span class="panel-label">Режим</span>
+                <div style="display:flex;gap:5px;">
+                    <button class="btn mode-btn active" id="btnN" onclick="setMode('normal')">Обычный</button>
+                    <button class="btn mode-btn" id="btnH" onclick="setMode('hybrid')">Гибрид</button>
+                    <button class="btn mode-btn" id="btnE" onclick="setMode('electric')">Электро</button>
+                </div>
+            </div>
+
+            <!-- Заряд батареи (ввод) -->
+            <div class="panel-section">
+                <span class="panel-label">Заряд</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <input type="number" id="battInput" value="80" min="0" max="100" onchange="setBattery()">
+                    <span style="font-size:0.75rem;color:var(--muted);">%</span>
+                </div>
+            </div>
+
+            <!-- Дозатор газа -->
+            <div class="panel-section row-span">
+                <span class="panel-label">Дозатор газа</span>
+                <div class="throttle-wrap">
+                    <input type="range" id="thrSlider" min="0" max="100" value="0" oninput="updateThrottle()">
+                    <span class="throttle-pct" id="thrPct">0%</span>
+                </div>
+            </div>
+
+            <!-- Крутящий момент -->
+            <div class="panel-section">
+                <span class="panel-label">Крутящий момент э/д</span>
+                <span class="panel-value muted" id="valTorque">0<span class="panel-unit"> Н·м</span></span>
+            </div>
+
+            <!-- Заряд батареи -->
+            <div class="panel-section">
+                <span class="panel-label">Заряд батареи</span>
+                <span class="panel-value" id="valBatt">80<span class="panel-unit"> %</span></span>
+            </div>
+
+            <!-- Расход -->
+            <div class="panel-section">
+                <span class="panel-label">Расход батареи</span>
+                <span class="panel-value muted" id="valConsumption">0.3<span class="panel-unit"> кВт·ч/100км</span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ STATE ============
+            const S = {
+                ignition: false,
+                mode: 'normal',
+                battery: 80,
+                throttle: 0,
+                engineOn: false,
+                motorRPM: 0,
+                motorTorque: 0,
+                drainRate: 0,
+                chargePower: 7.0,
+                battCapacity: 10,
+                simSpeed: 40,
+                hysteresis: {
+                    normal: { on: 50, off: 55 },
+                    hybrid: { on: 0, off: 0 },
+                    electric: { on: 20, off: 28 },
+                },
+            };
+
+            // ============ DOM ============
+            const $ = (id) => document.getElementById(id);
+
+            const btnIgn = $('btnIgn');
+            const btnN = $('btnN'),
+                btnH = $('btnH'),
+                btnE = $('btnE');
+            const battInput = $('battInput');
+            const thrSlider = $('thrSlider');
+            const thrPct = $('thrPct');
+            const valTorque = $('valTorque');
+            const valBatt = $('valBatt');
+            const valConsumption = $('valConsumption');
+
+            // Компоненты
+            const iceBody = $('iceBody'),
+                iceIcon = $('iceIcon');
+            const stIce = $('stIce'),
+                stIceDetail = $('stIceDetail');
+            const lblIce = $('lblIce');
+            const battBody = $('battBody');
+            const stBatt = $('stBatt'),
+                lblBatt = $('lblBatt');
+            const battSegs = [$('bS0'), $('bS1'), $('bS2'), $('bS3'), $('bS4')];
+            const motorBody = $('motorBody'),
+                motorIcon = $('motorIcon');
+            const stMotor = $('stMotor');
+            const lblMotor = $('lblMotor'),
+                lblMotor2 = $('lblMotor2');
+            const diffBody = $('diffBody');
+            const wUo = $('wUo'),
+                wLo = $('wLo');
+
+            // Линии
+            const lIceBatt = $('lIceBatt'),
+                dIceBatt = $('dIceBatt'),
+                aIceBatt = $('aIceBatt');
+            const lBattMotor = $('lBattMotor'),
+                dBattMotor = $('dBattMotor'),
+                aBattMotor = $('aBattMotor');
+            const lMotorDiff = $('lMotorDiff'),
+                dMotorDiff = $('dMotorDiff');
+            const lAxleU = $('lAxleU'),
+                lAxleL = $('lAxleL');
+            const aAxleU = $('aAxleU'),
+                aAxleL = $('aAxleL');
+
+            // ============ HYSTERESIS ============
+            function shouldEngineBeOn() {
+                if (!S.ignition) return false;
+                if (S.mode === 'hybrid') return true;
+                const h = S.hysteresis[S.mode];
+                if (S.engineOn) return S.battery <= h.off;
+                return S.battery <= h.on;
+            }
+
+            function updateEngine() { S.engineOn = shouldEngineBeOn(); }
+
+            function updateMotor() {
+                if (!S.ignition) { S.motorRPM = 0;
+                    S.motorTorque = 0;
+                    S.drainRate = 0; return; }
+                const t = S.throttle;
+                S.motorRPM = Math.round(t * 100);
+                S.motorTorque = +(t * 3.5).toFixed(1);
+                S.drainRate = +(0.3 + (t / 100) * 17.7).toFixed(1);
+            }
+
+            // ============ VISUALS ============
+            function applyVisuals() {
+                const ig = S.ignition;
+                const eng = S.engineOn;
+                const t = S.throttle;
+                const mot = ig && t > 0;
+                const bv = S.battery;
+
+                // --- ДВС ---
+                const iceOn = eng;
+                iceBody.classList.toggle('comp-on', iceOn);
+                iceIcon.setAttribute('fill', iceOn ? '#00ff41' : '#2e2e40');
+                stIce.textContent = iceOn ? 'РАБОТАЕТ' : (ig ? 'ОЖИДАНИЕ' : 'ВЫКЛ');
+                stIce.setAttribute('fill', iceOn ? '#00ff41' : (ig ? '#888' : '#555'));
+                stIceDetail.setAttribute('fill', iceOn ? '#00ff4130' : '#444');
+                lblIce.classList.toggle('txt-label-on', iceOn);
+
+                // --- Батарея ---
+                const bGlow = eng ? '#00ff41' : (bv > 50 ? '#00cc33' : bv > 25 ? '#cc8800' : '#cc2200');
+                battBody.classList.toggle('comp-on', eng || mot);
+                battBody.setAttribute('stroke', eng || mot ? bGlow : '#2e2e40');
+
+                const segN = battSegs.length;
+                const segPct = 100 / segN;
+                const fullH = 45;
+                battSegs.forEach((seg, i) => {
+                    const hi = (i + 1) * segPct;
+                    const lo = i * segPct;
+                    if (bv >= hi) {
+                        seg.setAttribute('fill', bGlow);
+                        seg.setAttribute('y', '16');
+                        seg.setAttribute('height', fullH);
+                    } else if (bv > lo) {
+                        const frac = (bv - lo) / segPct;
+                        const h = fullH * frac;
+                        seg.setAttribute('fill', bGlow);
+                        seg.setAttribute('y', 16 + fullH - h);
+                        seg.setAttribute('height', h);
+                    } else {
+                        seg.setAttribute('fill', '#222236');
+                        seg.setAttribute('y', '16');
+                        seg.setAttribute('height', fullH);
+                    }
+                });
+                stBatt.textContent = Math.round(bv) + '%';
+                stBatt.setAttribute('fill', bGlow);
+                lblBatt.classList.toggle('txt-label-on', eng || mot);
+
+                // --- Э/мотор ---
+                motorBody.classList.toggle('comp-on', mot);
+                motorIcon.setAttribute('fill', mot ? '#00ff41' : '#2e2e40');
+                stMotor.textContent = mot ? S.motorRPM + ' об/мин' : (ig && t === 0 ? 'ХОЛОСТОЙ' : 'ВЫКЛ');
+                stMotor.setAttribute('fill', mot ? '#00ff41' : (ig && t === 0 ? '#888' : '#555'));
+                lblMotor.classList.toggle('txt-label-on', mot || (ig && t === 0));
+                lblMotor2.classList.toggle('txt-label-on', mot || (ig && t === 0));
+
+                // --- Дифф ---
+                diffBody.classList.toggle('comp-on', mot);
+
+                // --- Колёса (без анимации) ---
+                const wc = mot ? '#00ff41' : '#2e2e40';
+                wUo.setAttribute('stroke', wc);
+                wLo.setAttribute('stroke', wc);
+                wUo.classList.toggle('comp-on', mot);
+                wLo.classList.toggle('comp-on', mot);
+
+                // --- Линии ДВС→Батарея ---
+                [lIceBatt, aIceBatt].forEach(el => {
+                    el.classList.toggle('line-on', eng);
+                    el.setAttribute('stroke', eng ? '#00ff41' : '#2e2e40');
+                    if (el.tagName === 'polygon') el.setAttribute('fill', eng ? '#00ff41' : '#2e2e40');
+                });
+                dIceBatt.classList.toggle('dash-on', eng);
+
+                // --- Линии Батарея→Мотор ---
+                [lBattMotor, aBattMotor].forEach(el => {
+                    el.classList.toggle('line-on', mot);
+                    el.setAttribute('stroke', mot ? '#00ff41' : '#2e2e40');
+                    if (el.tagName === 'polygon') el.setAttribute('fill', mot ? '#00ff41' : '#2e2e40');
+                });
+                dBattMotor.classList.toggle('dash-on', mot);
+
+                // --- Линии Мотор→Колёса ---
+                [lMotorDiff, lAxleU, lAxleL, aAxleU, aAxleL].forEach(el => {
+                    el.classList.toggle('line-on', mot);
+                    el.setAttribute('stroke', mot ? '#00ff41' : '#2e2e40');
+                    if (el.tagName === 'polygon') el.setAttribute('fill', mot ? '#00ff41' : '#2e2e40');
+                });
+                dMotorDiff.classList.toggle('dash-on', mot);
+            }
+
+            // ============ PANEL UI ============
+            function updatePanel() {
+                if (S.ignition && S.throttle > 0) {
+                    valTorque.innerHTML = S.motorTorque.toFixed(1) + '<span class="panel-unit"> Н·м</span>';
+                    valTorque.classList.remove('muted');
+                } else {
+                    valTorque.innerHTML = '0<span class="panel-unit"> Н·м</span>';
+                    valTorque.classList.add('muted');
+                }
+
+                const bv = Math.round(S.battery);
+                valBatt.innerHTML = bv + '<span class="panel-unit"> %</span>';
+                valBatt.style.color = bv <= 20 ? '#ff4444' : bv <= 50 && S.mode === 'normal' ? '#f0a030' :
+                    'var(--accent)';
+
+                const dr = S.ignition ? S.drainRate : 0;
+                valConsumption.innerHTML = dr.toFixed(1) + '<span class="panel-unit"> кВт·ч/100км</span>';
+                valConsumption.classList.toggle('muted', dr === 0);
+
+                if (document.activeElement !== battInput) battInput.value = bv;
+
+                thrSlider.value = S.throttle;
+                thrPct.textContent = S.throttle + '%';
+                thrSlider.disabled = !S.ignition;
+
+                btnIgn.textContent = S.ignition ? 'ON' : 'START';
+                btnIgn.classList.toggle('on', S.ignition);
+                btnN.classList.toggle('active', S.mode === 'normal');
+                btnH.classList.toggle('active', S.mode === 'hybrid');
+                btnE.classList.toggle('active', S.mode === 'electric');
+            }
+
+            function fullUpdate() { updateEngine();
+                updateMotor();
+                applyVisuals();
+                updatePanel(); }
+
+            // ============ ACTIONS ============
+            window.toggleIgnition = function() {
+                S.ignition = !S.ignition;
+                if (!S.ignition) { S.throttle = 0;
+                    thrSlider.value = 0;
+                    S.engineOn = false; }
+                fullUpdate();
+            };
+            window.setMode = function(mode) { S.mode = mode;
+                S.engineOn = false;
+                fullUpdate(); };
+            window.updateThrottle = function() { S.throttle = parseInt(thrSlider.value);
+                fullUpdate(); };
+            window.setBattery = function() {
+                let v = parseInt(battInput.value);
+                if (isNaN(v)) v = 80;
+                v = Math.max(0, Math.min(100, v));
+                S.battery = v;
+                battInput.value = v;
+                fullUpdate();
+            };
+
+            battInput.addEventListener('input', () => {
+                let v = parseInt(battInput.value);
+                if (!isNaN(v)) { v = Math.max(0, Math.min(100, v));
+                    S.battery = v;
+                    fullUpdate(); }
+            });
+            battInput.addEventListener('keydown', e => { if (e.key === 'Enter') { setBattery();
+                    battInput.blur(); } });
+
+            // ============ TICK ============
+            function tick() {
+                if (!S.ignition) { fullUpdate(); return; }
+                const dt = 0.1;
+                const drainPct = (S.drainRate / S.battCapacity) * (dt / 3600) * 100 * S.simSpeed;
+                let chargePct = 0;
+                if (S.engineOn) chargePct = (S.chargePower / S.battCapacity) * (dt / 3600) * 100 * S.simSpeed;
+                S.battery = Math.max(0, Math.min(100, S.battery + chargePct - drainPct));
+                if (S.battery <= 0 && !S.engineOn && S.mode === 'electric') S.battery = 0;
+                fullUpdate();
+            }
+
+            fullUpdate();
+            setInterval(tick, 100);
+        })();
+    </script>
+</body>
+</html>
